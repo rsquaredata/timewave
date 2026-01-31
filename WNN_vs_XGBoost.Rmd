@@ -1,0 +1,73 @@
+---
+title: "Introduction to WNNRina: Weighted Nearest Neighbors Forecasting"
+author: "Rina"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to WNNRina}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Description of the WNN Method
+
+The `WNNRina` package implements the Weighted Nearest Neighbor (WNN) algorithm for time series forecasting. This non-parametric approach predicts future values by identifying historical patterns (windows) similar to the current situation.
+
+The similarity is measures using the Euclidian distance, and the final forecast is a weighted average of the sequences that followed these neighbors in the past. We use a squared inverse distance weighting scheme:
+
+$$
+w_i = \frac{1 / d_i^2}{\sum_{j=1}^k 1/ d_j^2}
+$$
+
+## Basic usage
+
+Here is how to use the `predict_wnn` function with a synthetic dataset:
+
+```{r}
+library(WNNRina)
+
+# Generate a synthetic seasonal signal
+set.seed(123)
+history <- sin(seq(0, 100, length.out = 2000)) + rnorm(2000, sd = 0.1)
+
+# Forecast the next 96 points (i.e. one day at 15-min intervals)
+# window_size: length of the pattern to match
+# k: number of neighbors to consider
+forecast <- predict_wnn(train_y = history, window_size = 96, k = 5, forecast_h = 96)
+
+plot(forecast, type = "l", col = "blue", main = "WNN Forecast Example", ylab = "Value")
+```
+
+## Performance benchmarking
+
+In empirical tests conducted on high-frequency electricity load data, this WNN implementation serves as a robust baseline.
+
+Compared to advances supervised learning models like **XGBoost** (which achieved an RMSE of **10.71** on this specific dataset by incorporating exogenous variables like temperature), the **WNN** method achieved an RMSE of **20.23**.
+
+### Visual Comparison
+
+In our benchmark, we compared the WNN results with a pre-trained XGBoost model.
+
+```{r, fig.width=7, fig.height=4}
+# Example of how the comparison looks
+actuals <- sin(seq(0, pi, length.out = 96)) + 10
+xgb_preds <- actuals + rnorm(96, sd = 0.05)
+wnn_preds <- actuals + rnorm(96, sd = 0.2)
+
+plot(actuals, type="l", lwd=2, main="XGBoost vs WNN")
+lines(xgb_preds, col="red", lty=2)
+lines(wnn_preds, col="blue", lty=3)
+legend("topright", legend=c("Actual", "XGBoost", "WNN"), 
+       col=c("black", "red", "blue"), lty=1:3)
+```
+
+## Conclusion
+
+While XGBoost provides higher precision by leveraging external features and temporal trends, `WNNRina` offers a valuable non-parametric alternative that captures pure signal patterns without the need for extensive feature engineering or complex hyper-parameter tuning.
