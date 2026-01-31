@@ -307,7 +307,7 @@ Contributions are not expected, but constructive comments are always appreciated
 
 ## License
 
-This project is develeoped in an academic context. For educational use only.
+This project is developed in an academic context. For educational use only.
 
 ---
 
