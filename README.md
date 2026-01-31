@@ -4,6 +4,7 @@
 
 ### *Weighted Nearest Neighbors for Electricity Load Forecasting*
 
+
 [![R](https://img.shields.io/badge/R-4.3+-blue.svg)](https://www.r-project.org/)
 [![Time%20Series](https://img.shields.io/badge/Time%20Series-Forecasting-orange.svg)]()
 [![Energy](https://img.shields.io/badge/Application-Electricity%20Load-red.svg)]()
@@ -27,7 +28,9 @@
 - [Package](#package)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Reproducibility](#reproducibility)
 - [Project Structure](#project-structure)
+- [Contributing](#contributing)
 - [License](#license)
 - [Bibliography](#bibliography)
 
@@ -37,13 +40,33 @@
 
 **wnnTS** is an academic project dedicated to **electricity load forecasting** using classical, machine learning, and weighted nearest neighbors models.
 
-The project is based on a dataset which contains:
-- electricity consumption (kW)
-- outdoor air temperature
+Provided a dataset containing electricity consumption (kW) and outdoor air temperature (°C), both measured every **15 minutes** for a single building over **49 days**, the goal is to forecast electricity consumption for the **50th day (96 time steps)**, given historical consumption data and known temperature values for the forecast horizon.
 
-measured every **15 minutes** for a single building, from  **January 1st, 2010 (01:15)** to **February 18th, 2010 (23:45)**.
 
-The final objective is to **forecast electricity consumption for February 19th, 2010**, corresponding to **96 time steps (24 hours)**.
+### Dataset overview & exploratory analysis
+
+Key observed properties:
+- strong and stable daily seasonality (96 intervals per day)
+- recurring load patterns across days
+- suitability for pattern-based forecasting methods
+
+<p align="center">
+  <img src="doc/assets/cleaned_power_series.png" width="550">
+</p>
+
+<p align="center">
+  <img src="doc/assets/average_daily_profile.png" width="550">
+</p>
+
+Although outdoor temperature is moderately correlated with power consumption (Pearson correlation ≈ 0.48), it does not fully explain the short-term variability of the load.
+
+This suggests that a large part of the signal dynamics is driven by recurrent temporal patterns (daily routines, operational schedules, i.e. human activity), which motivates the use of pattern-based forecasting methods such as Weighted Nearest Neighbors.
+
+<p align="center">
+  <img src="doc/assets/power_temp_corr.png" width="550">
+</p>
+
+These observations motivate the exploration of forecasting approaches that exploit recurrent temporal patterns rather than relying solely on exogenous variables.
 
 ---
 
@@ -51,16 +74,12 @@ The final objective is to **forecast electricity consumption for February 19th, 
 
 ### Part 1 — Model comparison
 
-- Apply and compare forecasting models:
-  - Exponential smoothing
-  - SARIMA
-  - Neural networks
-  - LSTM
-  - XGBoost
-  - Random Forest
-  - Support Vector Machines
-  - Facebook Prophet
-- Tune model hyperparameters
+- Apply and compare families of forecasting models:
+  - **Baseline and deterministic models** (naive and seasonal naive baseline, random walk with drift, exponential smoothing)
+  - **Stochastic time series models** (SARIMA, SARIMAX)
+  - **Regression-based models** (quadratic regression with temperature effects, NNAR)
+  - **Machine learning models** (Random Forest, XGBoost, Support Vector Regression, Facebook Prophet)
+- Tune model hyperparameters following a [rigorous framework](doc/notebooks/model_comparison_framework.md)
 - Evaluate models using **rolling-origin cross-validation**
 - Select the **best-performing model**
 - Produce a final **24-hour forecast (96 values)**
@@ -109,9 +128,21 @@ Weighted Nearest Neighbors implementation
 Comparison between WNN and best benchmark model
 ```
 
+### Model Comparison
+
+To illustrate the differences between global regression-based approaches and local pattern-based methods, the following figure compares forecasts produced by a tuned XGBoost model and the Weighted Nearest Neighbors (WNN) approach on a representative validation day.
+
+While XGBoost leverages global relationships between covariates and the target variable, WNN relies exclusively on temporal pattern similarity. Both methods successfully capture the main daily structure of the load, but exhibit different behaviors in terms of smoothness and local adaptability.
+
+<p align="center">
+  <img src="doc/assets/model_comparison_plot.png" width="550">
+</p>
+
 ---
 
 ## Package
+
+The WNN approach complements regression-based models by focusing on local temporal similarity rather than global functional relationships.
 
 The `WNNRina` package implements a **Weighted Nearest Neighbors (WNN)** forecasting method for time series data.
 
@@ -215,6 +246,35 @@ vignette("Introduction to WNNRina")
 
 ---
 
+## Reproducibility
+
+## Reproducibility
+
+The entire project is fully reproducible.
+
+All data preprocessing, exploratory analysis, model benchmarking, and hyperparameter tuning are implemented in a single Quarto notebook.  
+To reproduce the full workflow:
+
+1. Download the [Quarto notebook](doc/notebooks/wnnTS_notebook.qmd) from the repository
+2. Open it in [**RStudio**](https://posit.co/download/rstudio-desktop/)
+3. Run the notebook from start to end
+
+> ⚠️ **Note on computation time**  
+> Running the full notebook can take a significant amount of time.  
+> This is expected, as model hyperparameters are tuned using grid search combined with rolling-origin cross-validation.  
+> Some models (e.g. XGBoost, neural networks) are particularly computationally expensive under this evaluation scheme.  
+> Depending on hardware, a full run may take over an hour.
+
+<p align="center">
+  <img src="doc/assets/cv-rolling.png" width="400"><br>
+  <em>“My neural network is CV-rolling.”</em><br>
+  <small>
+    Inspired by <a href="https://xkcd.com/303/" target="_blank">XKCD #303</a> (Randall Munroe).
+  </small>
+</p>
+
+---
+
 ## Project Structure
 
 ```
@@ -228,6 +288,22 @@ wnnTS/
 ├── README.md
 └── DESCRIPTION
 ```
+
+---
+
+## Contributing
+
+This project was developed in an academic context, but feedback and suggestions are welcome.
+
+If you would like to:
+- report a bug or an inconsistency
+- suggest an improvement or extension
+- discuss methodological choices
+- ask questions about the implementation
+
+Feel free to open an issue on the GitHub repository or contact the author directly.
+
+Contributions are not expected, but constructive comments are always appreciated.
 
 ---
 
