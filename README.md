@@ -135,8 +135,20 @@ To illustrate the differences between global regression-based approaches and loc
 While XGBoost leverages global relationships between covariates and the target variable, WNN relies exclusively on temporal pattern similarity. Both methods successfully capture the main daily structure of the load, but exhibit different behaviors in terms of smoothness and local adaptability.
 
 <p align="center">
-  <img src="doc/assets/model_comparison_plot.png" width="550">
+  <img src="doc/assets/model_comparison_plot.png" width="550"><br>
+  <sup>
+    Validation-day forecast comparison between XGBoost and Weighted Nearest Neighbors (WNN) on real electricity consumption data.
+  </sup>
 </p>
+
+<p align="center">
+  <img src="doc/assets/xgboost_wnn_comparison_synthetic.png" width="550"><br>
+  <sup>
+    XGBoost vs WNN on a synthetic sinusoidal time series.<br>
+    XGBoost produces a smoother global approximation, while WNN reflects local pattern variability induced by nearest-neighbor matching.
+  </sup>
+</p>
+
 
 ---
 
@@ -265,10 +277,8 @@ To reproduce the full workflow:
 
 <p align="center">
   <img src="doc/assets/cv-rolling.png" width="400"><br>
-  <em>“My neural network is CV-rolling.”</em><br>
-  <small>
-    Inspired by <a href="https://xkcd.com/303/" target="_blank">XKCD #303</a> (Randall Munroe).
-  </small>
+  <sup>“My neural network is CV-rolling.”</sup><br>
+  <sup><sub>Inspired by <a href="https://xkcd.com/303/" target="_blank">XKCD #303</a> (Randall Munroe).</sub></sup>
 </p>
 
 ---
